@@ -398,15 +398,13 @@ h1 {
 }
 
 .bowl__face span {
-  position: relative;
   width: 12px;
   height: 12px;
   background: #5b4138;
   border-radius: 50%;
 }
 
-.bowl__face span::after {
-  content: "";
+.bowl__mouth {
   position: absolute;
   top: 24px;
   left: 50%;

@@ -72,6 +72,7 @@ const heroArt = () => `
       <div class="bowl__face">
         <span></span>
         <span></span>
+        <div class="bowl__mouth"></div>
       </div>
     </div>
     <div class="star star--one"></div>
