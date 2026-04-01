@@ -1,0 +1,14 @@
+{
+  "name": "panelinha-do-bebe",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "type": "module",
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}
