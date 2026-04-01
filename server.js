@@ -47,6 +47,8 @@ const __dirname = path.dirname(__filename);
 const port = Number(process.env.PORT || 3004);
 const siteUrl = process.env.SITE_URL || `http://localhost:${port}`;
 const RECIPES_PER_PAGE = 9;
+const isDirectRun =
+  Boolean(process.argv[1]) && path.resolve(process.argv[1]) === __filename;
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
@@ -145,7 +147,16 @@ const readJsonBody = async (request) =>
     request.on("error", reject);
   });
 
-const server = http.createServer(async (request, response) => {
+const bootstrapApp = async () => {
+  await initDatabase();
+  await initUsersStore();
+};
+
+const bootstrapPromise = bootstrapApp();
+
+export const handleRequest = async (request, response) => {
+  await bootstrapPromise;
+
   if (!request.url) {
     sendNotFound(response);
     return;
@@ -562,22 +573,25 @@ const server = http.createServer(async (request, response) => {
   }
 
   sendNotFound(response);
-});
+};
 
-initDatabase()
-  .then(() => {
-    return initUsersStore();
-  })
-  .then(() => {
-    server.listen(port, () => {
-      console.log(
-        `Lana Baby Lab rodando em http://localhost:${port} usando ${
-          isDatabaseEnabled() ? "Neon/Postgres" : "arquivo local JSON"
-        }`
-      );
+export default handleRequest;
+
+if (isDirectRun) {
+  const server = http.createServer(handleRequest);
+
+  bootstrapPromise
+    .then(() => {
+      server.listen(port, () => {
+        console.log(
+          `Lana Baby Lab rodando em http://localhost:${port} usando ${
+            isDatabaseEnabled() ? "Neon/Postgres" : "arquivo local JSON"
+          }`
+        );
+      });
+    })
+    .catch((error) => {
+      console.error("Falha ao inicializar o banco:", error);
+      process.exit(1);
     });
-  })
-  .catch((error) => {
-    console.error("Falha ao inicializar o banco:", error);
-    process.exit(1);
-  });
+}
