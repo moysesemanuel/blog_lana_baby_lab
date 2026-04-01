@@ -11,6 +11,35 @@ const newsletterFeedback = document.querySelector("#newsletter-feedback");
 const title = document.querySelector("#recipe-title");
 const description = document.querySelector("#recipe-description");
 const topbarProfile = document.querySelector("#topbar-profile");
+const resolveYoutubeThumbnail = (value = "") => {
+  const input = String(value).trim();
+
+  if (!input) {
+    return "";
+  }
+
+  if (input.includes("i.ytimg.com") || input.match(/\.(jpg|jpeg|png|webp)(\?.*)?$/i)) {
+    return input;
+  }
+
+  try {
+    const url = new URL(input);
+    let videoId = "";
+
+    if (url.hostname.includes("youtu.be")) {
+      videoId = url.pathname.replace(/\//g, "");
+    } else if (url.hostname.includes("youtube.com")) {
+      videoId = url.searchParams.get("v") || "";
+      if (!videoId && url.pathname.startsWith("/shorts/")) {
+        videoId = url.pathname.split("/")[2] || "";
+      }
+    }
+
+    return videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : "";
+  } catch {
+    return "";
+  }
+};
 
 if (searchInput && emptyState) {
   let activeAgeFilter = "all";
@@ -226,6 +255,14 @@ if (
       .map((item) => item.trim())
       .filter(Boolean);
 
+  const isRecipeEmpty = (recipe) =>
+    !recipe.title &&
+    !recipe.age &&
+    !recipe.excerpt &&
+    !recipe.intro &&
+    recipe.ingredients.length === 0 &&
+    recipe.steps.length === 0;
+
   const getFormRecipe = () => {
     const formData = new FormData(studioForm);
     return {
@@ -238,6 +275,10 @@ if (
       prepTime: formData.get("prepTime")?.toString().trim() || studioTemplate.prepTime,
       yield: formData.get("yield")?.toString().trim() || studioTemplate.yield,
       texture: formData.get("texture")?.toString().trim() || studioTemplate.texture,
+      youtubeUrl: formData.get("youtubeUrl")?.toString().trim() || studioTemplate.youtubeUrl,
+      youtubeThumbnail: resolveYoutubeThumbnail(
+        formData.get("youtubeUrl")?.toString().trim() || ""
+      ),
       ingredients: normalizeLines(formData.get("ingredients")?.toString() || ""),
       steps: normalizeLines(formData.get("steps")?.toString() || ""),
       tip: formData.get("tip")?.toString().trim() || studioTemplate.tip,
@@ -257,13 +298,45 @@ if (
         <article><strong>Textura</strong><span>${recipe.texture}</span></article>
       </div>
     </section>
-    <section class="recipe-layout">
+    <section class="recipe-layout recipe-layout--single">
       <article class="recipe-panel">
         <h2>Ingredientes</h2>
         <ul class="recipe-list">
           ${recipe.ingredients.map((item) => `<li>${item}</li>`).join("")}
         </ul>
       </article>
+    </section>
+    ${
+      recipe.youtubeThumbnail
+        ? `
+          <section class="recipe-layout recipe-layout--single">
+            <article class="recipe-panel recipe-panel--video">
+              <h2>Vídeo da receita</h2>
+              ${
+                recipe.youtubeUrl
+                  ? `
+                    <a href="${recipe.youtubeUrl}" target="_blank" rel="noreferrer">
+                      <img
+                        class="recipe-video-thumb"
+                        src="${recipe.youtubeThumbnail}"
+                        alt="Thumbnail do vídeo da receita ${recipe.title}"
+                      />
+                    </a>
+                  `
+                  : `
+                    <img
+                      class="recipe-video-thumb"
+                      src="${recipe.youtubeThumbnail}"
+                      alt="Thumbnail do vídeo da receita ${recipe.title}"
+                    />
+                  `
+              }
+            </article>
+          </section>
+        `
+        : ""
+    }
+    <section class="recipe-layout recipe-layout--single">
       <article class="recipe-panel">
         <h2>Modo de preparo</h2>
         <ol class="recipe-list recipe-list--ordered">
@@ -284,7 +357,18 @@ if (
   `;
 
   const renderPreview = () => {
-    studioPreviewRoot.innerHTML = previewMarkup(getFormRecipe());
+    const recipe = getFormRecipe();
+
+    if (isRecipeEmpty(recipe)) {
+      studioPreviewRoot.innerHTML = `
+        <div class="studio-preview-empty">
+          <p>Preencha os campos da receita para ver a prévia aparecer aqui.</p>
+        </div>
+      `;
+      return;
+    }
+
+    studioPreviewRoot.innerHTML = previewMarkup(recipe);
   };
 
   const getDrafts = () => {
@@ -321,6 +405,36 @@ if (
 
   const resetFormToTemplate = () => {
     fillForm({ ...studioTemplate, publishedSlug: "" });
+  };
+
+  const clearForm = () => {
+    const emptyValues = {
+      title: "",
+      age: "",
+      excerpt: "",
+      intro: "",
+      theme: studioTemplate.theme,
+      emoji: "",
+      prepTime: "",
+      yield: "",
+      texture: "",
+      youtubeUrl: "",
+      ingredients: "",
+      steps: "",
+      tip: "",
+      serving: "",
+      publishedSlug: ""
+    };
+
+    Object.entries(emptyValues).forEach(([key, value]) => {
+      const field = studioForm.elements.namedItem(key);
+      if (field) {
+        field.value = value;
+      }
+    });
+
+    updatePublishState("");
+    renderPreview();
   };
 
   const updatePublishState = (publishedSlug = "") => {
@@ -485,8 +599,8 @@ if (
   });
 
   studioResetButton.addEventListener("click", () => {
-    resetFormToTemplate();
-    studioFeedback.textContent = "Template padrão restaurado.";
+    clearForm();
+    studioFeedback.textContent = "Formulário limpo.";
   });
 
   studioDraftsList.addEventListener("click", (event) => {
@@ -572,7 +686,7 @@ if (
     }
   });
 
-  resetFormToTemplate();
+  clearForm();
   renderDrafts();
   await loadSession();
   updateAuthUi();

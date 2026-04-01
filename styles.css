@@ -67,7 +67,7 @@ body::after {
 
 .hero {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding: 28px 36px 46px;
   border-radius: 36px;
   background:
@@ -103,6 +103,8 @@ body::after {
   justify-content: space-between;
   gap: 16px;
   margin-top: 18px;
+  position: relative;
+  z-index: 3;
 }
 
 .brand,
@@ -195,6 +197,7 @@ h3 {
 
 .profile-menu {
   position: relative;
+  z-index: 6;
 }
 
 .profile-dropdown {
@@ -207,6 +210,7 @@ h3 {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 16px 32px rgba(122, 101, 93, 0.14);
+  z-index: 7;
 }
 
 .profile-dropdown__item {
@@ -975,6 +979,11 @@ main {
   gap: 14px;
 }
 
+.studio-preview-empty p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .studio-form label {
   display: grid;
   gap: 8px;
@@ -1103,6 +1112,13 @@ main {
   gap: 20px;
 }
 
+.studio-preview-empty {
+  padding: 28px;
+  border: 2px dashed rgba(255, 158, 183, 0.32);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
 .age-categories__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1149,6 +1165,10 @@ main {
 .recipe-page {
   display: grid;
   gap: 24px;
+}
+
+.recipe-layout--single {
+  grid-template-columns: 1fr;
 }
 
 .recipe-hero {
@@ -1229,6 +1249,19 @@ main {
 
 .recipe-layout {
   grid-template-columns: repeat(2, 1fr);
+}
+
+.recipe-panel--video {
+  overflow: hidden;
+}
+
+.recipe-video-thumb {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  border-radius: 24px;
+  object-fit: cover;
+  box-shadow: var(--shadow);
 }
 
 .recipe-grid--category {

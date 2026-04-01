@@ -159,13 +159,45 @@ const studioPreview = (recipe = studioTemplate) => `
       <article><strong>Textura</strong><span>${recipe.texture}</span></article>
     </div>
   </section>
-  <section class="recipe-layout">
+  <section class="recipe-layout recipe-layout--single">
     <article class="recipe-panel">
       <h2>Ingredientes</h2>
       <ul class="recipe-list">
         ${recipe.ingredients.map((item) => `<li>${item}</li>`).join("")}
       </ul>
     </article>
+  </section>
+  ${
+    recipe.youtubeThumbnail
+      ? `
+        <section class="recipe-layout recipe-layout--single">
+          <article class="recipe-panel recipe-panel--video">
+            <h2>Vídeo da receita</h2>
+            ${
+              recipe.youtubeUrl
+                ? `
+                  <a href="${recipe.youtubeUrl}" target="_blank" rel="noreferrer">
+                    <img
+                      class="recipe-video-thumb"
+                      src="${recipe.youtubeThumbnail}"
+                      alt="Thumbnail do vídeo da receita ${recipe.title}"
+                    />
+                  </a>
+                `
+                : `
+                  <img
+                    class="recipe-video-thumb"
+                    src="${recipe.youtubeThumbnail}"
+                    alt="Thumbnail do vídeo da receita ${recipe.title}"
+                  />
+                `
+            }
+          </article>
+        </section>
+      `
+      : ""
+  }
+  <section class="recipe-layout recipe-layout--single">
     <article class="recipe-panel">
       <h2>Modo de preparo</h2>
       <ol class="recipe-list recipe-list--ordered">
@@ -485,45 +517,45 @@ export const renderStudio = (siteUrl = site.url) =>
         <section class="studio-layout">
           <section class="studio-panel">
             <div class="section-heading">
-              <p class="section-tag">Template padrão</p>
+              <p class="section-tag">Nova receita</p>
               <h2>Preenchimento da receita</h2>
             </div>
 
             <form class="studio-form" id="studio-form">
               <label>
                 <span>Título</span>
-                <input name="title" type="text" value="${studioTemplate.title}" />
+                <input name="title" type="text" value="" />
               </label>
               <label>
                 <span>Faixa etária</span>
-                <input name="age" type="text" value="${studioTemplate.age}" />
+                <input name="age" type="text" value="" />
               </label>
               <label>
                 <span>Resumo curto</span>
-                <textarea name="excerpt" rows="3">${studioTemplate.excerpt}</textarea>
+                <textarea name="excerpt" rows="3"></textarea>
               </label>
               <label>
                 <span>Introdução</span>
-                <textarea name="intro" rows="4">${studioTemplate.intro}</textarea>
+                <textarea name="intro" rows="4"></textarea>
               </label>
               <div class="studio-form__grid">
                 <label>
                   <span>Tempo</span>
-                  <input name="prepTime" type="text" value="${studioTemplate.prepTime}" />
+                  <input name="prepTime" type="text" value="" />
                 </label>
                 <label>
                   <span>Rendimento</span>
-                  <input name="yield" type="text" value="${studioTemplate.yield}" />
+                  <input name="yield" type="text" value="" />
                 </label>
               </div>
               <div class="studio-form__grid">
                 <label>
                   <span>Textura</span>
-                  <input name="texture" type="text" value="${studioTemplate.texture}" />
+                  <input name="texture" type="text" value="" />
                 </label>
                 <label>
                   <span>Emoji da receita</span>
-                  <input name="emoji" type="text" value="${studioTemplate.emoji}" />
+                  <input name="emoji" type="text" value="" />
                 </label>
               </div>
               <label>
@@ -540,20 +572,29 @@ export const renderStudio = (siteUrl = site.url) =>
                 </select>
               </label>
               <label>
+                <span>Link do YouTube</span>
+                <input
+                  name="youtubeUrl"
+                  type="url"
+                  value=""
+                  placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
+                />
+              </label>
+              <label>
                 <span>Ingredientes, um por linha</span>
-                <textarea name="ingredients" rows="6">${studioTemplate.ingredients.join("\n")}</textarea>
+                <textarea name="ingredients" rows="6"></textarea>
               </label>
               <label>
                 <span>Modo de preparo, um passo por linha</span>
-                <textarea name="steps" rows="6">${studioTemplate.steps.join("\n")}</textarea>
+                <textarea name="steps" rows="6"></textarea>
               </label>
               <label>
                 <span>Dica carinhosa</span>
-                <textarea name="tip" rows="3">${studioTemplate.tip}</textarea>
+                <textarea name="tip" rows="3"></textarea>
               </label>
               <label>
                 <span>Como servir</span>
-                <textarea name="serving" rows="3">${studioTemplate.serving}</textarea>
+                <textarea name="serving" rows="3"></textarea>
               </label>
 
               <div class="studio-actions">
@@ -564,7 +605,7 @@ export const renderStudio = (siteUrl = site.url) =>
                   Publicar no blog
                 </button>
                 <button class="button button--ghost" type="button" id="studio-reset">
-                  Novo rascunho
+                  Limpar formulário
                 </button>
               </div>
 
@@ -598,7 +639,9 @@ export const renderStudio = (siteUrl = site.url) =>
               <h2>Prévia da receita</h2>
             </div>
             <div class="studio-preview-root" id="studio-preview-root">
-              ${studioPreview(studioTemplate)}
+              <div class="studio-preview-empty">
+                <p>Preencha os campos da receita para ver a prévia aparecer aqui.</p>
+              </div>
             </div>
           </section>
         </section>
@@ -759,6 +802,38 @@ export const renderRecipePage = (recipe, siteUrl = site.url) => {
               ${recipe.ingredients.map((item) => `<li>${item}</li>`).join("")}
             </ul>
           </article>
+        </section>
+        ${
+          recipe.youtubeThumbnail
+            ? `
+              <section class="recipe-layout recipe-layout--single">
+                <article class="recipe-panel recipe-panel--video">
+                  <h2>Vídeo da receita</h2>
+                  ${
+                    recipe.youtubeUrl
+                      ? `
+                        <a href="${recipe.youtubeUrl}" target="_blank" rel="noreferrer">
+                          <img
+                            class="recipe-video-thumb"
+                            src="${recipe.youtubeThumbnail}"
+                            alt="Thumbnail do vídeo da receita ${recipe.title}"
+                          />
+                        </a>
+                      `
+                      : `
+                        <img
+                          class="recipe-video-thumb"
+                          src="${recipe.youtubeThumbnail}"
+                          alt="Thumbnail do vídeo da receita ${recipe.title}"
+                        />
+                      `
+                  }
+                </article>
+              </section>
+            `
+            : ""
+        }
+        <section class="recipe-layout recipe-layout--single">
           <article class="recipe-panel">
             <h2>Modo de preparo</h2>
             <ol class="recipe-list recipe-list--ordered">

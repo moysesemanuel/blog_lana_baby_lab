@@ -66,6 +66,36 @@ const ageToKey = (age) => {
   return match ? match[0] : "8";
 };
 
+const resolveYoutubeThumbnail = (value = "") => {
+  const input = String(value).trim();
+
+  if (!input) {
+    return "";
+  }
+
+  if (input.includes("i.ytimg.com") || input.match(/\.(jpg|jpeg|png|webp)(\?.*)?$/i)) {
+    return input;
+  }
+
+  try {
+    const url = new URL(input);
+    let videoId = "";
+
+    if (url.hostname.includes("youtu.be")) {
+      videoId = url.pathname.replace(/\//g, "");
+    } else if (url.hostname.includes("youtube.com")) {
+      videoId = url.searchParams.get("v") || "";
+      if (!videoId && url.pathname.startsWith("/shorts/")) {
+        videoId = url.pathname.split("/")[2] || "";
+      }
+    }
+
+    return videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : "";
+  } catch {
+    return "";
+  }
+};
+
 const buildKeywords = (recipe) =>
   [
     recipe.title,
@@ -128,6 +158,8 @@ export const publishRecipe = async (input) => {
       ["Rendimento", input.yield],
       ["Textura", input.texture]
     ],
+    youtubeUrl: String(input.youtubeUrl || "").trim(),
+    youtubeThumbnail: resolveYoutubeThumbnail(input.youtubeUrl || input.youtubeThumbnail || ""),
     ingredients: input.ingredients,
     steps: input.steps,
     tip: input.tip,
@@ -174,6 +206,8 @@ export const updatePublishedRecipe = async (slug, input) => {
       ["Rendimento", input.yield],
       ["Textura", input.texture]
     ],
+    youtubeUrl: String(input.youtubeUrl || "").trim(),
+    youtubeThumbnail: resolveYoutubeThumbnail(input.youtubeUrl || input.youtubeThumbnail || ""),
     ingredients: input.ingredients,
     steps: input.steps,
     tip: input.tip,

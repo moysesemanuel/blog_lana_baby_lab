@@ -25,6 +25,8 @@ export const studioTemplate = {
   prepTime: "20 min",
   yield: "2 porções pequenas",
   texture: "Cremosa e macia",
+  youtubeUrl: "",
+  youtubeThumbnail: "",
   ingredients: [
     "1 cenoura média cozida",
     "1 batata pequena cozida",
